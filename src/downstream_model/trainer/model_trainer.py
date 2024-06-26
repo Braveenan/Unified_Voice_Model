@@ -54,10 +54,16 @@ class TripleTasksModelTrainer:
         self.loss_fn = nn.CrossEntropyLoss()
         self.scheduler = ReduceLROnPlateau(self.optimizer, mode='min', patience=scheduler_parameters['patience'], factor=scheduler_parameters['factor'], verbose=True)
         
-        self.test_accuracy_all_threshold = 0.0
-        self.test_accuracy_task1_threshold = 0.0
-        self.test_accuracy_task2_threshold = 0.0
-        self.test_accuracy_task3_threshold = 0.0
+        self.best_accuracy_all_threshold = 0.0
+        self.best_accuracy_task1_threshold = 0.0
+        self.best_accuracy_task2_threshold = 0.0
+        self.best_accuracy_task3_threshold = 0.0
+
+        self.opt_accuracy_all_threshold = 0.0
+        self.opt_accuracy_task1_threshold = 0.0
+        self.opt_accuracy_task2_threshold = 0.0
+        self.opt_accuracy_task3_threshold = 0.0
+        self.opt_accuracy_avg_threshold = 0.0
         
         self.train_losses_all = []
         self.train_accuracies_all = []
@@ -350,13 +356,23 @@ class TripleTasksModelTrainer:
             if os.path.exists(model_epoch_checkpoint_to_remove):
                 os.remove(model_epoch_checkpoint_to_remove)
 
-        if test_accuracy["all"] > self.test_accuracy_all_threshold:
-            self.test_accuracy_all_threshold = test_accuracy["all"]
-            self.test_accuracy_task1_threshold = test_accuracy["task1"]
-            self.test_accuracy_task2_threshold = test_accuracy["task2"]
-            self.test_accuracy_task3_threshold = test_accuracy["task3"]
+        if test_accuracy["all"] > self.best_accuracy_all_threshold:
+            self.best_accuracy_all_threshold = test_accuracy["all"]
+            self.best_accuracy_task1_threshold = test_accuracy["task1"]
+            self.best_accuracy_task2_threshold = test_accuracy["task2"]
+            self.best_accuracy_task3_threshold = test_accuracy["task3"]
             model_best_checkpoint_path = model_checkpoint_path.replace(".pth", f"_best.pth")
             torch.save(self.model.state_dict(), model_best_checkpoint_path)
+            
+        avg_accuracy = (test_accuracy["task1"] + test_accuracy["task2"] + test_accuracy["task3"])/3
+        if avg_accuracy > self.opt_accuracy_avg_threshold:
+            self.opt_accuracy_avg_threshold = avg_accuracy
+            self.opt_accuracy_all_threshold = test_accuracy["all"]
+            self.opt_accuracy_task1_threshold = test_accuracy["task1"]
+            self.opt_accuracy_task2_threshold = test_accuracy["task2"]
+            self.opt_accuracy_task3_threshold = test_accuracy["task3"]
+            model_opt_checkpoint_path = model_checkpoint_path.replace(".pth", f"_opt.pth")
+            torch.save(self.model.state_dict(), model_opt_checkpoint_path)
         
     def _generate_epoch_info(self, epoch, num_epochs, train_loss, train_accuracy, test_loss, test_accuracy, task_name, result_text_path):
         epoch_info = f"Epoch {epoch+1}/{num_epochs} - Train Loss {task_name}: {train_loss:.4f}, Train Accuracy {task_name}: {train_accuracy:.4f}, Test Loss {task_name}: {test_loss:.4f}, Test Accuracy {task_name}: {test_accuracy:.4f}"
@@ -418,21 +434,37 @@ class TripleTasksModelTrainer:
             learning_rate_value = self.optimizer.param_groups[0]["lr"]
             self.learning_rate_array.append(learning_rate_value)
 
-        best_accuracy_text_all = f"Best model accuracy - all: {self.test_accuracy_all_threshold}"
+        best_accuracy_text_all = f"Best model accuracy - all: {self.best_accuracy_all_threshold}"
         print(best_accuracy_text_all)
         self._save_to_txt(best_accuracy_text_all, self.result_text_path_all)
 
-        best_accuracy_text_task1 = f"Best model accuracy - {self.label_key_array[0]}: {self.test_accuracy_task1_threshold}"
+        best_accuracy_text_task1 = f"Best model accuracy - {self.label_key_array[0]}: {self.best_accuracy_task1_threshold}"
         print(best_accuracy_text_task1)
         self._save_to_txt(best_accuracy_text_task1, self.result_text_path_task1)
 
-        best_accuracy_text_task2 = f"Best model accuracy - {self.label_key_array[1]}: {self.test_accuracy_task2_threshold}"
+        best_accuracy_text_task2 = f"Best model accuracy - {self.label_key_array[1]}: {self.best_accuracy_task2_threshold}"
         print(best_accuracy_text_task2)
         self._save_to_txt(best_accuracy_text_task2, self.result_text_path_task2)
 
-        best_accuracy_text_task3 = f"Best model accuracy - {self.label_key_array[2]}: {self.test_accuracy_task3_threshold}"
+        best_accuracy_text_task3 = f"Best model accuracy - {self.label_key_array[2]}: {self.best_accuracy_task3_threshold}"
         print(best_accuracy_text_task3)
         self._save_to_txt(best_accuracy_text_task3, self.result_text_path_task3)
+        
+        opt_accuracy_text_all = f"Opt model accuracy - all: {self.opt_accuracy_all_threshold}"
+        print(opt_accuracy_text_all)
+        self._save_to_txt(opt_accuracy_text_all, self.result_text_path_all)
+
+        opt_accuracy_text_task1 = f"Opt model accuracy - {self.label_key_array[0]}: {self.opt_accuracy_task1_threshold}"
+        print(opt_accuracy_text_task1)
+        self._save_to_txt(opt_accuracy_text_task1, self.result_text_path_task1)
+
+        opt_accuracy_text_task2 = f"Opt model accuracy - {self.label_key_array[1]}: {self.opt_accuracy_task2_threshold}"
+        print(opt_accuracy_text_task2)
+        self._save_to_txt(opt_accuracy_text_task2, self.result_text_path_task2)
+
+        opt_accuracy_text_task3 = f"Opt model accuracy - {self.label_key_array[2]}: {self.opt_accuracy_task3_threshold}"
+        print(opt_accuracy_text_task3)
+        self._save_to_txt(opt_accuracy_text_task3, self.result_text_path_task3)
             
     def plot_metrics(self):
         self._plot_function(self.num_epochs, self.train_accuracies_all, self.test_accuracies_all, self.train_losses_all, self.test_losses_all, self.result_plot_path_all, self.plot_title_all)

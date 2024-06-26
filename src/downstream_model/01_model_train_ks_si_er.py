@@ -86,12 +86,12 @@ dropout_prob_er = 0.3
 l1_lambda = 0
 l2_lambda = 1e-06
 
-root_path = "/userdirs/braveenan2/voice_dataset"
+root_path = "/home/braveenan/voice_dataset"
 root_speechcommand = os.path.join(root_path, "SpeechCommand")
 root_voxceleb = os.path.join(root_path, "VoxCeleb")
 root_iemocap = os.path.join(root_path, "IEMOCAP")
     
-root_emb_path = f"/userdirs/braveenan2/embedding/{upstream_model_type}/{frame_pooling_type}"
+root_emb_path = f"/home/braveenan/embedding/{upstream_model_type}/{frame_pooling_type}"
 root_emb_speechcommand = os.path.join(root_emb_path, "SpeechCommand")
 root_emb_voxceleb = os.path.join(root_emb_path, "VoxCeleb")
 root_emb_iemocap = os.path.join(root_emb_path, "IEMOCAP")
@@ -297,30 +297,50 @@ save_to_txt(current_datetime, result_text_path_task3)
 best_checkpoint_path = model_checkpoint_path.replace(".pth", "_best.pth")
 print(best_checkpoint_path)
 
+opt_checkpoint_path = model_checkpoint_path.replace(".pth", "_opt.pth")
+print(opt_checkpoint_path)
+
 best_file_name = best_checkpoint_path.replace(".pth", "")
 best_file_name = best_file_name.replace("checkpoint/", "result/")
 best_text_path = f"{best_file_name}_eval.txt"
 
+opt_file_name = opt_checkpoint_path.replace(".pth", "")
+opt_file_name = opt_file_name.replace("checkpoint/", "result/")
+opt_text_path = f"{opt_file_name}_eval.txt"
+
 current_datetime = return_current_datetime()
 print(current_datetime)
 save_to_txt(current_datetime, best_text_path)
+save_to_txt(current_datetime, opt_text_path)
 
 save_to_txt(tasks_text, best_text_path)
 save_to_txt(upstreammodel_text, best_text_path)
 save_to_txt(transformer_text, best_text_path)
 save_to_txt(layer_pooling_text, best_text_path)
 
+save_to_txt(tasks_text, opt_text_path)
+save_to_txt(upstreammodel_text, opt_text_path)
+save_to_txt(transformer_text, opt_text_path)
+save_to_txt(layer_pooling_text, opt_text_path)
+
 print(dataset_text)
 save_to_txt(dataset_text, best_text_path)
+save_to_txt(dataset_text, opt_text_path)
 
 dataset_length_text = f"No of testing data samples: {len(testing_data)}"
 print(dataset_length_text)
 save_to_txt(dataset_length_text, best_text_path)
+save_to_txt(dataset_length_text, opt_text_path)
 
 evaluator = TripleTaskModelEvaluator(model, best_checkpoint_path, testing_data, device, label_array)
 evaluator.get_loss_and_accuracy(best_text_path)
 evaluator.get_labels_and_predictions(best_file_name)
 
+evaluator = TripleTaskModelEvaluator(model, opt_checkpoint_path, testing_data, device, label_array)
+evaluator.get_loss_and_accuracy(opt_text_path)
+evaluator.get_labels_and_predictions(opt_file_name)
+
 current_datetime = return_current_datetime()
 print(current_datetime)
 save_to_txt(current_datetime, best_text_path)
+save_to_txt(current_datetime, opt_text_path)
