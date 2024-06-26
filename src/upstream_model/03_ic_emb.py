@@ -112,6 +112,9 @@ for upstream_model_type in model_option_array:
                 csv_file.write(f"{wavpath},{label},{wavlength},{duration},{emblength},{subset},{file_size_readable}\n")
 
                 print(f"{subset} {index+1} {wavpath}")
+                
+                # Clear the cache after each record
+                torch.cuda.empty_cache()
 
         # Create and open the CSV file for writing
         output_csv_file = os.path.join(root_iemocap_emb, f"iemocap_{upstream_model_type}_{frame_pooling_type}.csv")
