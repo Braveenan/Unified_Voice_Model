@@ -42,17 +42,54 @@ class DownstreamTripleTaskModel(nn.Module):
         def std_pooling(x):
             return x.std(dim=1)
 
+        def first_pooling(x):
+            return x[:, 0, :]
+
+        def last_pooling(x):
+            return x[:, -1, :]
+
         def max_pooling(x):
             return x.max(dim=1).values
 
         def min_pooling(x):
             return x.min(dim=1).values
 
+        def skew_pooling(x):
+            return torch.tensor(stats.skew(x.cpu().numpy(), axis=1), dtype=x.dtype, device=x.device)
+
+        def l2_pooling(x):
+            return torch.sqrt((x ** 2).mean(dim=1))
+
+        def iqr_pooling(x):
+            q75, q25 = torch.quantile(x, 0.75, dim=1), torch.quantile(x, 0.25, dim=1)
+            return q75 - q25
+
+        def range_pooling(x):
+            return x.max(dim=1).values - x.min(dim=1).values
+
+        def median_pooling(x):
+            return torch.median(x, dim=1).values
+
+        def energy_pooling(x):
+            return torch.sqrt((x ** 2).sum(dim=1))
+
+        def log_sum_exp_pooling(x):
+            return torch.logsumexp(x, dim=1)
+
         pooling_operations = {
             "mean": mean_pooling,
             "std": std_pooling,
+            "first": first_pooling,
+            "last": last_pooling,
             "max": max_pooling,
             "min": min_pooling,
+            "skew": skew_pooling,
+            "l2": l2_pooling,
+            "iqr": iqr_pooling,
+            "range": range_pooling,
+            "median": median_pooling,
+            "energy": energy_pooling,
+            "logsumexp": log_sum_exp_pooling,
         }
 
         sub_layer_pooling_array = layer_pooling_type.split("_")
