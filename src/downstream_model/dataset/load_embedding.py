@@ -11,15 +11,15 @@ class LoadEmbedding:
         transformer_layer_array=None,
         device=None
     ):
-        self.root_speechcommand = dataset_root_dict["speechcommand"]
-        self.root_voxceleb = dataset_root_dict["voxceleb"]
-        self.root_iemocap = dataset_root_dict["iemocap"]
-        self.root_emb_speechcommand = embedding_root_dict["speechcommand"]
-        self.root_emb_voxceleb = embedding_root_dict["voxceleb"]
-        self.root_emb_iemocap = embedding_root_dict["iemocap"]
-        self.label_mapping_speechcommand = label_mapping_dict["speechcommand"]
-        self.label_mapping_voxceleb = label_mapping_dict["voxceleb"]
-        self.label_mapping_iemocap = label_mapping_dict["iemocap"]
+        self.root_speechcommand = dataset_root_dict.get("speechcommand", None)
+        self.root_voxceleb = dataset_root_dict.get("voxceleb", None)
+        self.root_iemocap = dataset_root_dict.get("iemocap", None)
+        self.root_emb_speechcommand = embedding_root_dict.get("speechcommand", None)
+        self.root_emb_voxceleb = embedding_root_dict.get("voxceleb", None)
+        self.root_emb_iemocap = embedding_root_dict.get("iemocap", None)
+        self.label_mapping_speechcommand = label_mapping_dict.get("speechcommand", None)
+        self.label_mapping_voxceleb = label_mapping_dict.get("voxceleb", None)
+        self.label_mapping_iemocap = label_mapping_dict.get("iemocap", None)
         self.upstream_model_type = upstream_model_type
         self.frame_pooling_type = frame_pooling_type
         self.transformer_layer_array = transformer_layer_array
