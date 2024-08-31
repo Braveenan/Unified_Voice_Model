@@ -41,12 +41,12 @@ def set_device(device_index=None):
         return device
 
 device = set_device(0)
-transformer_layer_array = [11, 13, 16]
+transformer_layer_array = [7, 10, 20]
 upstream_model_type = "wavlm_large"
 upstream_model_variation = upstream_model_type.split("_")[-1]
 no_of_encoders = 12 if upstream_model_variation == "base" else 24
 frame_pooling_type = "mean"
-layer_pooling_type = "mean"
+layer_pooling_type = "l2"
 task_type = "ks_si_er"
 data_loading_percentage = 100
 
@@ -78,13 +78,13 @@ saved_checkpoint_count = 1
 patience = 1
 factor = 0.5
     
-dropout_prob_shared = 0.7
-dropout_prob_ks = 0.2
+dropout_prob_shared = 0.4
+dropout_prob_ks = 0.55
 dropout_prob_si = 0.6
-dropout_prob_er = 0.3
+dropout_prob_er = 0.5
 
-l1_lambda = 0
-l2_lambda = 1e-06
+l1_lambda = 1e-07
+l2_lambda = 1e-05
 
 root_path = "/home/braveenan/voice_dataset"
 root_speechcommand = os.path.join(root_path, "SpeechCommand")
